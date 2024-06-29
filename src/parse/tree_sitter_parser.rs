@@ -55,6 +55,10 @@ pub(crate) struct TreeSitterConfig {
     /// position. This ensures that `[1, 2]` and `[1, 2,]` have the
     /// same syntax tree, and reformatting a list literal isn't
     /// treated as a change.
+    ///
+    /// We need this to be opt-in, as some languages treat trailing
+    /// tokens as meaningful in some positions. E.g. `(1)` and `(1,)`
+    /// are different in Python (the latter is a tuple).
     ignore_trailing_tokens: Vec<(&'static str, &'static str)>,
 
     /// Tree-sitter query used for syntax highlighting this
@@ -669,7 +673,11 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                     // > at the same level in JSX.
                     ("<", ">"),
                 ],
-                ignore_trailing_tokens: vec![],
+                ignore_trailing_tokens: vec![
+                    ("formal_parameters", ","),
+                    ("array", ","),
+                    ("object", ","),
+                ],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/javascript.scm"),
@@ -1028,7 +1036,12 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: vec!["char_literal", "string_literal"].into_iter().collect(),
                 delimiter_tokens: vec![("{", "}"), ("(", ")"), ("[", "]"), ("|", "|"), ("<", ">")],
-                ignore_trailing_tokens: vec![],
+                ignore_trailing_tokens: vec![
+                    ("arguments", ","),
+                    ("parameters", ","),
+                    ("token_tree", ","),
+                    ("tuple_type", ","),
+                ],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/rust.scm"),
@@ -1733,6 +1746,26 @@ fn syntax_from_cursor<'a>(
     }
 }
 
+fn should_ignore_last_child(
+    config: &TreeSitterConfig,
+    node: &ts::Node<'_>,
+    children: &[&Syntax<'_>],
+) -> bool {
+    for (node_kind, token_str) in &config.ignore_trailing_tokens {
+        if node.kind() != *node_kind {
+            continue;
+        }
+
+        if let Some(Syntax::Atom { content, .. }) = children.last() {
+            if content == token_str {
+                return true;
+            }
+        }
+    }
+
+    false
+}
+
 /// Convert the tree-sitter node at `cursor` to a difftastic list
 /// node.
 fn list_from_cursor<'a>(
@@ -1838,6 +1871,10 @@ fn list_from_cursor<'a>(
         node_i += 1;
     }
     cursor.goto_parent();
+
+    if should_ignore_last_child(config, &root_node, &between_delim) {
+        between_delim.pop();
+    }
 
     let inner_list = Syntax::new_list(
         arena,
