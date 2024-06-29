@@ -51,6 +51,12 @@ pub(crate) struct TreeSitterConfig {
     /// mark which token pairs we consider to be delimiters.
     delimiter_tokens: Vec<(&'static str, &'static str)>,
 
+    /// Tokens that we want to ignore if they occur in a trailing
+    /// position. This ensures that `[1, 2]` and `[1, 2,]` have the
+    /// same syntax tree, and reformatting a list literal isn't
+    /// treated as a change.
+    ignore_trailing_tokens: Vec<(&'static str, &'static str)>,
+
     /// Tree-sitter query used for syntax highlighting this
     /// language.
     highlight_query: ts::Query,
@@ -145,6 +151,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                     .into_iter()
                     .collect(),
                 delimiter_tokens: vec![("(", ")"), ("[", "]")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/ada.scm"),
@@ -169,6 +176,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 .into_iter()
                 .collect(),
                 delimiter_tokens: vec![("[", "]"), ("(", ")"), ("{", "}")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/apex.scm"),
@@ -185,6 +193,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                     .into_iter()
                     .collect(),
                 delimiter_tokens: vec![("(", ")"), ("{", "}"), ("[", "]")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/bash.scm"),
@@ -199,6 +208,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: vec!["string_literal", "char_literal"].into_iter().collect(),
                 delimiter_tokens: vec![("(", ")"), ("{", "}"), ("[", "]")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/c.scm"),
@@ -215,6 +225,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 // names are generally the same.
                 atom_nodes: vec!["string_literal", "char_literal"].into_iter().collect(),
                 delimiter_tokens: vec![("(", ")"), ("{", "}"), ("[", "]"), ("<", ">")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     concat!(
@@ -234,6 +245,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 delimiter_tokens: vec![("{", "}"), ("(", ")"), ("[", "]")]
                     .into_iter()
                     .collect(),
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/clojure.scm"),
@@ -248,6 +260,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: vec!["argument"].into_iter().collect(),
                 delimiter_tokens: vec![("(", ")")].into_iter().collect(),
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/cmake.scm"),
@@ -262,6 +275,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: vec!["str_lit", "char_lit"].into_iter().collect(),
                 delimiter_tokens: vec![("(", ")")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(language, "").unwrap(),
                 sub_languages: vec![],
             }
@@ -279,6 +293,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 .into_iter()
                 .collect(),
                 delimiter_tokens: vec![("{", "}"), ("(", ")")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/c-sharp.scm"),
@@ -300,6 +315,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 .into_iter()
                 .collect(),
                 delimiter_tokens: vec![("{", "}"), ("(", ")")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/css.scm"),
@@ -314,6 +330,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: vec!["string_literal", "script_tag"].into_iter().collect(),
                 delimiter_tokens: vec![("{", "}"), ("(", ")"), ("[", "]"), ("<", ">")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/dart.scm"),
@@ -330,6 +347,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                     .into_iter()
                     .collect(),
                 delimiter_tokens: vec![("<", ">"), ("{", "}"), ("(", ")")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/devicetree.scm"),
@@ -346,6 +364,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 delimiter_tokens: vec![("{", "}"), ("(", ")"), ("[", "]")]
                     .into_iter()
                     .collect(),
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/elisp.scm"),
@@ -362,6 +381,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 delimiter_tokens: vec![("(", ")"), ("{", "}"), ("do", "end")]
                     .into_iter()
                     .collect(),
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/elixir.scm"),
@@ -376,6 +396,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: vec!["string_constant_expr"].into_iter().collect(),
                 delimiter_tokens: vec![("{", "}"), ("[", "]"), ("(", ")")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/elm.scm"),
@@ -390,6 +411,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: [].into(),
                 delimiter_tokens: vec![("{", "}"), ("(", ")"), ("[", "]"), ("|", "|")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/elvish.scm"),
@@ -404,6 +426,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: [].into(),
                 delimiter_tokens: vec![("(", ")"), ("{", "}"), ("[", "]")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/erlang.scm"),
@@ -418,6 +441,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: ["string", "triple_quoted_string"].into(),
                 delimiter_tokens: vec![("(", ")"), ("[", "]"), ("{", "}")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/f-sharp.scm"),
@@ -432,6 +456,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: ["string"].into(),
                 delimiter_tokens: vec![("(", ")"), ("[", "]"), ("{", "}")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/gleam.scm"),
@@ -450,6 +475,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 delimiter_tokens: vec![("{", "}"), ("[", "]"), ("(", ")")]
                     .into_iter()
                     .collect(),
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/go.scm"),
@@ -464,6 +490,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: vec!["prefixed_string", "heredoc"].into_iter().collect(),
                 delimiter_tokens: vec![("[", "]"), ("(", ")"), ("<", ">"), ("{", "}")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/hack.scm"),
@@ -480,6 +507,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                     .into_iter()
                     .collect(),
                 delimiter_tokens: vec![("[", "]"), ("(", ")"), ("{", "}")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/hare.scm"),
@@ -503,6 +531,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 .into_iter()
                 .collect(),
                 delimiter_tokens: vec![("[", "]"), ("(", ")")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/haskell.scm"),
@@ -524,6 +553,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                     ("%{~", "~}"),
                     ("${", "}"),
                 ],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/hcl.scm"),
@@ -548,6 +578,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 delimiter_tokens: vec![("<", ">"), ("<!", ">"), ("<!--", "-->")]
                     .into_iter()
                     .collect(),
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/html.scm"),
@@ -582,6 +613,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 ]
                 .into_iter()
                 .collect(),
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/janet_simple.scm"),
@@ -612,6 +644,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 .into_iter()
                 .collect(),
                 delimiter_tokens: vec![("(", ")"), ("{", "}"), ("[", "]")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/java.scm"),
@@ -636,6 +669,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                     // > at the same level in JSX.
                     ("<", ">"),
                 ],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/javascript.scm"),
@@ -650,6 +684,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: vec!["string"].into_iter().collect(),
                 delimiter_tokens: vec![("{", "}"), ("[", "]")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/json.scm"),
@@ -671,6 +706,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 .into_iter()
                 .collect(),
                 delimiter_tokens: vec![("{", "}"), ("[", "]"), ("(", ")")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/julia.scm"),
@@ -693,6 +729,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 delimiter_tokens: vec![("(", ")"), ("{", "}"), ("[", "]"), ("<", ">")]
                     .into_iter()
                     .collect(),
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/kotlin.scm"),
@@ -707,6 +744,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: vec![].into_iter().collect(),
                 delimiter_tokens: vec![("{", "}"), ("[", "]")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/latex.scm"),
@@ -723,6 +761,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 delimiter_tokens: vec![("(", ")"), ("{", "}"), ("[", "]")]
                     .into_iter()
                     .collect(),
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/lua.scm"),
@@ -737,6 +776,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: vec!["shell_text", "text"].into_iter().collect(),
                 delimiter_tokens: vec![("(", ")")].into_iter().collect(),
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/make.scm"),
@@ -755,6 +795,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: vec![].into_iter().collect(),
                 delimiter_tokens: vec![("(", ")")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/newick.scm"),
@@ -771,6 +812,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                     .into_iter()
                     .collect(),
                 delimiter_tokens: vec![("{", "}"), ("[", "]")].into_iter().collect(),
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/nix.scm"),
@@ -792,6 +834,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                     ("@{", "}"),
                     ("@[", "]"),
                 ],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/objc.scm"),
@@ -806,6 +849,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: OCAML_ATOM_NODES.iter().copied().collect(),
                 delimiter_tokens: vec![("(", ")"), ("[", "]"), ("{", "}")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/ocaml.scm"),
@@ -820,6 +864,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: OCAML_ATOM_NODES.iter().copied().collect(),
                 delimiter_tokens: vec![("(", ")"), ("[", "]"), ("{", "}")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/ocaml.scm"),
@@ -834,6 +879,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: vec![].into_iter().collect(),
                 delimiter_tokens: vec![("(", ")"), ("[", "]")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/pascal.scm"),
@@ -859,6 +905,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 .into_iter()
                 .collect(),
                 delimiter_tokens: vec![("(", ")"), ("{", "}"), ("[", "]")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/perl.scm"),
@@ -873,6 +920,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: vec!["string", "encapsed_string"].into_iter().collect(),
                 delimiter_tokens: vec![("(", ")"), ("[", "]"), ("{", "}")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/php.scm"),
@@ -887,6 +935,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: vec!["string"].into_iter().collect(),
                 delimiter_tokens: vec![("(", ")"), ("[", "]"), ("{", "}")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/python.scm"),
@@ -903,6 +952,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                     .into_iter()
                     .collect(),
                 delimiter_tokens: vec![("{", "}"), ("(", ")"), ("[", "]"), ("<", ">")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     concat!(
@@ -921,6 +971,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: vec!["string", "special"].into_iter().collect(),
                 delimiter_tokens: vec![("{", "}"), ("(", ")"), ("[", "]")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/r.scm"),
@@ -937,6 +988,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                     .into_iter()
                     .collect(),
                 delimiter_tokens: vec![("{", "}"), ("(", ")"), ("[", "]")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/racket.scm"),
@@ -961,6 +1013,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                     ("begin", "end"),
                     ("class", "end"),
                 ],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/ruby.scm"),
@@ -975,6 +1028,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: vec!["char_literal", "string_literal"].into_iter().collect(),
                 delimiter_tokens: vec![("{", "}"), ("(", ")"), ("[", "]"), ("|", "|"), ("<", ">")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/rust.scm"),
@@ -989,6 +1043,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: vec!["string", "template_string"].into_iter().collect(),
                 delimiter_tokens: vec![("{", "}"), ("(", ")"), ("[", "]")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/scala.scm"),
@@ -1003,6 +1058,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: vec!["string"].into_iter().collect(),
                 delimiter_tokens: vec![("{", "}"), ("(", ")"), ("[", "]")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/scheme.scm"),
@@ -1019,6 +1075,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                     .into_iter()
                     .collect(),
                 delimiter_tokens: vec![("{", "}"), ("(", ")")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/scss.scm"),
@@ -1033,6 +1090,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: HashSet::from(["string"]),
                 delimiter_tokens: Vec::new(),
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/smali.scm"),
@@ -1047,6 +1105,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: vec!["string"].into_iter().collect(),
                 delimiter_tokens: vec![("[", "]"), ("(", ")"), ("{", "}")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/solidity.scm"),
@@ -1061,6 +1120,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: vec!["string", "identifier"].into_iter().collect(),
                 delimiter_tokens: vec![("(", ")")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/sql.scm"),
@@ -1075,6 +1135,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: ["line_string_literal"].into(),
                 delimiter_tokens: vec![("{", "}"), ("(", ")"), ("[", "]"), ("<", ">")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/swift.scm"),
@@ -1089,6 +1150,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: vec!["string", "quoted_key"].into_iter().collect(),
                 delimiter_tokens: vec![("{", "}"), ("[", "]")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/toml.scm"),
@@ -1103,6 +1165,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: vec!["string", "template_string"].into_iter().collect(),
                 delimiter_tokens: vec![("{", "}"), ("(", ")"), ("[", "]"), ("<", ">")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     concat!(
@@ -1122,6 +1185,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                     .into_iter()
                     .collect(),
                 delimiter_tokens: vec![("{", "}"), ("(", ")"), ("[", "]"), ("<", ">")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     concat!(
@@ -1142,6 +1206,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 // e.g. string subexpressions, so flatten.
                 atom_nodes: vec!["AttValue", "XMLDecl"].into_iter().collect(),
                 delimiter_tokens: (vec![("<", ">")]),
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/xml.scm"),
@@ -1163,6 +1228,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 .into_iter()
                 .collect(),
                 delimiter_tokens: (vec![("{", "}"), ("(", ")"), ("[", "]")]),
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/yaml.scm"),
@@ -1177,6 +1243,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 language,
                 atom_nodes: vec![].into_iter().collect(),
                 delimiter_tokens: vec![("(", ")")],
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/vhdl.scm"),
@@ -1195,6 +1262,7 @@ pub(crate) fn from_language(language: guess::Language) -> TreeSitterConfig {
                 delimiter_tokens: (vec![("{", "}"), ("[", "]"), ("(", ")")])
                     .into_iter()
                     .collect(),
+                ignore_trailing_tokens: vec![],
                 highlight_query: ts::Query::new(
                     language,
                     include_str!("../../vendored_parsers/highlights/zig.scm"),
